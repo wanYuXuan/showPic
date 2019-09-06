@@ -30,7 +30,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private PermissionListener mListener;
 
     private String[] PERMISSION_STORAGE ={
-            "android.permission.INTERNET"
+            "android.permission.INTERNET",
+            "android.permission.CAMERA"
     };
 
     @Override
