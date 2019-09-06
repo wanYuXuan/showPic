@@ -21,6 +21,7 @@ public class PictureLoader {
     private byte[] picByte;
 
     @SuppressLint("HandlerLeak")
+    private
     Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -47,7 +48,7 @@ public class PictureLoader {
         new Thread(runnable).start();
     }
 
-    Runnable runnable = new Runnable() {
+    private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             try{
