@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int page =1;
     private SisterApi sisterApi;
     private TextView textView;
+    private SisterTask sisterTask;
 
     private String[] PERMISSION_STORAGE ={
             "android.permission.INTERNET",
@@ -55,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initData() {
         data = new ArrayList<>();
-        new SisterTask(page).execute();
     }
 
     private void initUI(){
@@ -90,18 +90,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_next:
-                curPos++;
                 if(data!=null && !data.isEmpty()) {
                     if (curPos >= (data.size())) {
                         curPos = 0;
                     }
                     loader.load(showImg, data.get(curPos).getUrl());
                     textView.setText("URL \n"+data.get(curPos).getUrl());
+                    curPos++;
                 }
                 break;
             case R.id.btn_refresh:
-                page++;
-                new SisterTask(page).execute();
+                SisterTask sisterTask = new SisterTask();
+                sisterTask.execute();
                 curPos=0;
                 break;
         }
@@ -152,10 +152,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private class SisterTask extends AsyncTask<Void,Void,ArrayList<Sister>>{
 
-        private int page;
 
-        public SisterTask(int page){
-            this.page = page;
+        public SisterTask(){
+            super();
         }
 
         @Override
@@ -168,8 +167,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             super.onPostExecute(sisters);
             data.clear();
             data.addAll(sisters);
+            page++;
         }
+
+
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sisterTask = null;
+    }
 }
