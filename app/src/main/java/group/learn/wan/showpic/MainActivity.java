@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -17,17 +18,22 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import group.learn.wan.showpic.model.Sister;
+import group.learn.wan.showpic.model.util.SisterApi;
 import group.learn.wan.showpic.tool.PermissionListener;
 import group.learn.wan.showpic.tool.PictureLoader;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Button showBtn;
     private ImageView showImg;
-    private ArrayList<String> urls;
     private int curPos =0;
     private PictureLoader loader;
     private  Activity activity;
     private PermissionListener mListener;
+    private Button refreshBtn;
+    private ArrayList<Sister> data;
+    private int page =1;
+    private SisterApi sisterApi;
 
     private String[] PERMISSION_STORAGE ={
             "android.permission.INTERNET",
@@ -40,27 +46,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         activity = this;
         loader = new PictureLoader();
+        sisterApi = new SisterApi();
         initData();
         initUI();
     }
 
     private void initData() {
-        urls = new ArrayList<>();
-        urls.add("http://ww4.sinaimg.cn/large/610dc034jw1f6ipaai7wgj20dw0kugp4.jpg");
-        urls.add("http://ww3.sinaimg.cn/large/610dc034jw1f6gcxc1t7vj20hs0hsgo1.jpg");
-        urls.add("http://ww4.sinaimg.cn/large/610dc034jw1f6f5ktcyk0j20u011hacg.jpg");
-        urls.add("http://ww1.sinaimg.cn/large/610dc034jw1f6e1f1qmg3j20u00u0djp.jpg");
-        urls.add("http://ww3.sinaimg.cn/large/610dc034jw1f6aipo68yvj20qo0qoaee.jpg");
-        urls.add("http://ww3.sinaimg.cn/large/610dc034jw1f69c9e22xjj20u011hjuu.jpg");
-        urls.add("http://ww3.sinaimg.cn/large/610dc034jw1f689lmaf7qj20u00u00v7.jpg");
-        urls.add("http://ww3.sinaimg.cn/large/c85e4a5cjw1f671i8gt1rj20vy0vydsz.jpg");
-        urls.add("http://ww2.sinaimg.cn/large/610dc034jw1f65f0oqodoj20qo0hntc9.jpg");
-        urls.add("http://ww2.sinaimg.cn/large/c85e4a5cgw1f62hzfvzwwj20hs0qogpo.jpg");
+        data = new ArrayList<>();
+        new SisterTask(page).execute();
     }
 
     private void initUI(){
         showBtn = findViewById(R.id.btn_next);
         showImg = findViewById(R.id.Image_view);
+        refreshBtn=findViewById(R.id.btn_refresh);
         if(Build.VERSION.SDK_INT >= 23){
             requestRuntimePremissions(PERMISSION_STORAGE, new PermissionListener() {
                 @Override
@@ -81,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
         }
         showBtn.setOnClickListener(this);
+        refreshBtn.setOnClickListener(this);
     }
 
     @Override
@@ -88,10 +88,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.btn_next:
                 curPos++;
-                if(curPos>=(urls.size())){
+                if(data!=null && !data.isEmpty())
+                if(curPos>=(data.size())){
                     curPos=0;
                 }
-                loader.load(showImg,urls.get(curPos));
+                loader.load(showImg,data.get(curPos).getUrl());
+                break;
+            case R.id.btn_refresh:
+                page++;
+                new SisterTask(page).execute();
+                curPos=0;
                 break;
         }
     }
@@ -138,4 +144,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+
+    private class SisterTask extends AsyncTask<Void,Void,ArrayList<Sister>>{
+
+        private int page;
+
+        public SisterTask(int page){
+            this.page = page;
+        }
+
+        @Override
+        protected ArrayList<Sister> doInBackground(Void... voids) {
+            return sisterApi.fetchSister(10,page);
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Sister> sisters) {
+            super.onPostExecute(sisters);
+            data.clear();
+            data.addAll(sisters);
+        }
+    }
+
+
 }
