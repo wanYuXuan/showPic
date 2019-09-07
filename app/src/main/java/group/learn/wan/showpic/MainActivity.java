@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<Sister> data;
     private int page =1;
     private SisterApi sisterApi;
+    private TextView textView;
 
     private String[] PERMISSION_STORAGE ={
             "android.permission.INTERNET",
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         showBtn = findViewById(R.id.btn_next);
         showImg = findViewById(R.id.Image_view);
         refreshBtn=findViewById(R.id.btn_refresh);
+        textView=findViewById(R.id.content);
         if(Build.VERSION.SDK_INT >= 23){
             requestRuntimePremissions(PERMISSION_STORAGE, new PermissionListener() {
                 @Override
@@ -88,11 +91,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.btn_next:
                 curPos++;
-                if(data!=null && !data.isEmpty())
-                if(curPos>=(data.size())){
-                    curPos=0;
+                if(data!=null && !data.isEmpty()) {
+                    if (curPos >= (data.size())) {
+                        curPos = 0;
+                    }
+                    loader.load(showImg, data.get(curPos).getUrl());
+                    textView.setText("URL \n"+data.get(curPos).getUrl());
                 }
-                loader.load(showImg,data.get(curPos).getUrl());
                 break;
             case R.id.btn_refresh:
                 page++;
@@ -129,20 +134,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults.length>0){
+        if (grantResults.length > 0) {
             List<String> deniedList = new ArrayList<>();
-            for (int i=0;i<grantResults.length;i++){
+            for (int i = 0; i < grantResults.length; i++) {
                 int grantResult = grantResults[i];
-                if(grantResult == PackageManager.PERMISSION_GRANTED){
-                    mListener.granted();
-                }else {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     deniedList.add(permissions[i]);
                 }
             }
-            if(!deniedList.isEmpty()){
-                mListener.denied(deniedList);
+                if (!deniedList.isEmpty()) {
+                    mListener.denied(deniedList);
+                } else {
+                    mListener.granted();
+                }
             }
-        }
     }
 
     private class SisterTask extends AsyncTask<Void,Void,ArrayList<Sister>>{
