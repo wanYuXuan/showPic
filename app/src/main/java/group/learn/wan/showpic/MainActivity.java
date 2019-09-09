@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import group.learn.wan.showpic.model.Sister;
+import group.learn.wan.showpic.model.SisterLoader;
 import group.learn.wan.showpic.model.util.SisterApi;
 import group.learn.wan.showpic.tool.PermissionListener;
 import group.learn.wan.showpic.tool.PictureLoader;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView showImg;
     private int curPos =0;
     private PictureLoader loader;
+    private SisterLoader mLoader;
     private  Activity activity;
     private PermissionListener mListener;
     private Button refreshBtn;
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         activity = this;
         loader = new PictureLoader();
+        mLoader = SisterLoader.getInstance(MainActivity.this);
         sisterApi = new SisterApi();
         initData();
         initUI();
@@ -94,7 +98,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (curPos >= (data.size())) {
                         curPos = 0;
                     }
-                    loader.load(showImg, data.get(curPos).getUrl());
+               //     loader.load(showImg, data.get(curPos).getUrl());
+                    mLoader.bindBitmap(data.get(curPos).getUrl(),showImg,400,400);
                     textView.setText("URL \n"+data.get(curPos).getUrl());
                     curPos++;
                 }
