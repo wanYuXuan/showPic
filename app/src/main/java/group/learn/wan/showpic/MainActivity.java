@@ -6,10 +6,16 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,9 +23,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import group.learn.wan.showpic.crash.CrashHandler;
+import group.learn.wan.showpic.crash.RestartAPPTool;
 import group.learn.wan.showpic.model.Sister;
 import group.learn.wan.showpic.model.SisterLoader;
 import group.learn.wan.showpic.model.util.SisterApi;
@@ -43,7 +52,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String[] PERMISSION_STORAGE ={
             "android.permission.INTERNET",
-            "android.permission.CAMERA"
+            "android.permission.CAMERA",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.READ_EXTERNAL_STORAGE"
     };
 
     @Override
@@ -54,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loader = new PictureLoader();
         mLoader = SisterLoader.getInstance(MainActivity.this);
         sisterApi = new SisterApi();
+        CrashHandler.getInstance().init(this,getApplication().getPackageName());
         initData();
         initUI();
     }
@@ -71,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             requestRuntimePremissions(PERMISSION_STORAGE, new PermissionListener() {
                 @Override
                 public void granted() {
-                    Toast.makeText(activity,"已获取全部权限",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator +"\n已获取全部权限",Toast.LENGTH_SHORT).show();
                     showBtn.setVisibility(View.VISIBLE);
                 }
 
@@ -94,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_next:
+                int a=1/0;
+
                 if(data!=null && !data.isEmpty()) {
                     if (curPos >= (data.size())) {
                         curPos = 0;
@@ -103,6 +117,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     textView.setText("URL \n"+data.get(curPos).getUrl());
                     curPos++;
                 }
+
+   /*             new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(getApplication().getPackageName());
+                        LaunchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(LaunchIntent);
+                    }
+                }, 1000);// 1秒钟后重启应用*/
+
+
                 break;
             case R.id.btn_refresh:
                 SisterTask sisterTask = new SisterTask();
